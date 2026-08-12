@@ -71,7 +71,6 @@ function createAlarmWindow(task) {
     movable: true,
     minimizable: false,
     maximizable: false,
-    closable: false, // "확인" 버튼으로만 닫히도록 (Alt+F4 등 우회 방지)
     alwaysOnTop: true,
     skipTaskbar: false,
     show: false,
@@ -86,7 +85,7 @@ function createAlarmWindow(task) {
   alarmWindow.setAlwaysOnTop(true, 'screen-saver');
   alarmWindow.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
 
-  // closable:false로도 일부 환경에서 우회될 수 있어 이중 안전장치로 close 이벤트도 직접 차단
+  // "확인" 버튼(close-alarm)이 눌러지기 전까지는 Alt+F4 등 어떤 방식으로도 닫히지 않도록 차단
   alarmWindow.on('close', (event) => {
     if (!alarmConfirmed) {
       event.preventDefault();
