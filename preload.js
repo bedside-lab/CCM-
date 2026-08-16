@@ -17,4 +17,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
 
   // 프로그램 버전 조회 (정보 팝업용)
   getAppVersion: () => ipcRenderer.invoke('get-app-version'),
+
+  // 외부 링크를 기본 브라우저로 열기
+  openExternal: (url) => ipcRenderer.send('open-external', url),
 });

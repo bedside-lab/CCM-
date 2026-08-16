@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, screen } = require('electron');
+const { app, BrowserWindow, ipcMain, screen, shell } = require('electron');
 const path = require('path');
 const fs = require('fs');
 
@@ -38,7 +38,7 @@ function createWidgetWindow() {
     height: 760,
     minWidth: 380,
     minHeight: 500,
-    title: '업무알리미',
+    title: 'Work Alert',
     autoHideMenuBar: true,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
@@ -153,4 +153,11 @@ ipcMain.on('close-alarm', () => {
   alarmConfirmed = true;
   if (alarmWindow) alarmWindow.close();
   if (widgetWindow) widgetWindow.flashFrame(false);
+});
+
+ipcMain.on('open-external', (event, url) => {
+  // 신뢰할 수 있는 고정 링크만 열도록 제한 (블로그 주소만 허용)
+  if (url === 'https://bedsidelab.blogspot.com/') {
+    shell.openExternal(url);
+  }
 });

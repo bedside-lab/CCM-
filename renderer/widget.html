@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<title>업무알리미</title>
+<title>Work Alert</title>
 <style>
   /* 외부 웹폰트(구글 폰트) 대신 윈도우 내장 글꼴을 사용합니다.
      병원 등 외부 인터넷이 제한된 환경에서도 항상 즉시 로딩되도록 하기 위함입니다. */
@@ -168,11 +168,16 @@
   .addtimebar button.addbtn:hover{ filter:brightness(1.08); }
 
   .brandbar{
-    display:flex; align-items:center; justify-content:flex-end; gap:6px;
+    display:flex; align-items:center; justify-content:space-between; gap:6px;
     padding:8px 16px 10px; background:var(--panel); flex-shrink:0;
-    opacity:0.85; cursor:pointer;
   }
-  .brandbar:hover{ opacity:1; }
+  .brandbar .bloglink{
+    font-size:11px; color:var(--teal); text-decoration:none; opacity:0.8; cursor:pointer;
+    background:none; border:none; font-family:inherit; padding:0;
+  }
+  .brandbar .bloglink:hover{ opacity:1; text-decoration:underline; }
+  .brandbar .brandright{ display:flex; align-items:center; gap:6px; opacity:0.85; cursor:pointer; }
+  .brandbar .brandright:hover{ opacity:1; }
   .brandbar img{ width:26px; height:26px; border-radius:6px; object-fit:cover; }
   .brandbar span{ font-size:13px; letter-spacing:0.3px; color:var(--text); font-weight:700; }
 
@@ -199,6 +204,8 @@
     padding:7px 0; border-radius:8px; font-size:12px; font-weight:700; cursor:pointer;
   }
   .dowchip.on{ background:rgba(45,212,191,0.15); border-color:var(--teal); color:var(--teal); }
+  .dowchip.everyday{ flex:1.3; }
+  .dowchip.everyday.on{ background:rgba(245,166,35,0.15); border-color:var(--amber); color:var(--amber); }
 
   .recuritem{
     display:flex; align-items:center; gap:8px; padding:8px 0;
@@ -226,83 +233,86 @@
     <div class="dateline">
       <span class="date" id="dateStr">-</span>
       <div class="headright">
-        <button id="pinBtn" onclick="togglePin()" title="항상 위 고정 켜기/끄기">📌 고정 꺼짐</button>
-        <span class="shiftbadge" id="shiftBadge">-</span>
+        <button id="pinBtn" onclick="togglePin()" title="Toggle always-on-top">📌 Pin: Off</button>
+        <span class="shiftbadge">Regular Hours</span>
       </div>
     </div>
     <div class="clock"><span id="hm">--:--</span><span class="sec" id="ss">--</span></div>
-    <div class="nextswitch">매일 자정(00시)에 자동 초기화됩니다</div>
+    <div class="nextswitch">Automatically resets every day at midnight (recurring alarms are kept)</div>
   </div>
 
   <div class="actionbar">
-    <button onclick="clearAll()">🔄 초기화</button>
-    <button onclick="openRecurring()">🔁 반복 알람</button>
+    <button onclick="clearAll()">🔄 Reset</button>
+    <button onclick="openRecurring()">🔁 Recurring Alarms</button>
   </div>
 
   <div class="timeline" id="timeline"></div>
 
   <div class="addtimebar">
-    <span class="rowlabel">시간 직접 추가 (24시간제, 예: 2230 → 22:30)</span>
+    <span class="rowlabel">Add a custom time (24h format, e.g. 2230 → 22:30)</span>
     <div class="row">
       <div class="timeinputwrap">
         <input type="text" id="inTimeText" inputmode="numeric" maxlength="5" placeholder="HH:MM">
-        <button type="button" class="clockbtn" onclick="openTimePicker()" title="시계로 선택">🕐</button>
+        <button type="button" class="clockbtn" onclick="openTimePicker()" title="Pick with clock">🕐</button>
         <input type="time" id="inTimeHidden" tabindex="-1">
       </div>
-      <button class="addbtn" onclick="addTimeSlot()">+ 이 시간 추가하기</button>
+      <button class="addbtn" onclick="addTimeSlot()">+ Add this time</button>
     </div>
   </div>
 
-  <div class="brandbar" onclick="openAbout()" title="프로그램 정보 보기">
-    <img src="assets/logo.png" alt="logo">
-    <span>Bedside Lab</span>
+  <div class="brandbar">
+    <button class="bloglink" onclick="openBlog()">bedsidelab.blogspot.com</button>
+    <div class="brandright" onclick="openAbout()" title="About this app">
+      <img src="assets/logo.png" alt="logo">
+      <span>Bedside Lab</span>
+    </div>
   </div>
 </div>
 
 <div class="overlay" id="aboutOverlay">
   <div class="confirmbox" style="text-align:center;">
     <img src="assets/logo.png" alt="logo" style="width:88px;height:88px;border-radius:16px;object-fit:cover;margin-bottom:14px;">
-    <div style="font-size:17px;font-weight:700;margin-bottom:2px;">업무알리미</div>
+    <div style="font-size:17px;font-weight:700;margin-bottom:2px;">Work Alert</div>
     <div style="font-size:12px;color:var(--muted);margin-bottom:14px;">Clinical Leadership · Healthcare Quality · Operational Innovation</div>
     <div style="font-size:12.5px;color:var(--text);margin-bottom:4px;">Version <span id="aboutVersion">-</span></div>
     <div style="font-size:11px;color:var(--muted);margin-bottom:22px;">© 2026 Bedside Lab. All rights reserved.</div>
-    <button class="yesbtn" style="width:100%;background:var(--teal);color:#06251f;" onclick="closeAbout()">닫기</button>
+    <button class="yesbtn" style="width:100%;background:var(--teal);color:#06251f;" onclick="closeAbout()">Close</button>
   </div>
 </div>
 
 <div class="overlay" id="confirmOverlay">
   <div class="confirmbox">
-    <div class="label">⚠ 확인</div>
-    <div class="msg" id="confirmMsg">정말 초기화할까요?</div>
+    <div class="label">⚠ Confirm</div>
+    <div class="msg" id="confirmMsg">Are you sure you want to reset?</div>
     <div class="btnrow">
-      <button class="cancelbtn" onclick="closeConfirm()">취소</button>
-      <button class="yesbtn" id="confirmYesBtn">초기화</button>
+      <button class="cancelbtn" onclick="closeConfirm()">Cancel</button>
+      <button class="yesbtn" id="confirmYesBtn">Reset</button>
     </div>
   </div>
 </div>
 
 <div class="overlay" id="recurringOverlay">
   <div class="confirmbox" style="width:340px;text-align:left;">
-    <div class="label" style="color:var(--teal);">🔁 반복 알람</div>
+    <div class="label" style="color:var(--teal);">🔁 Recurring Alarms</div>
     <div style="font-size:11.5px;color:var(--muted);margin-bottom:12px;">
-      선택한 요일마다, 근무조 시간표와 상관없이 매주 반복해서 알람이 울려요.
+      Fires every week on the days you choose, independent of the daily reset.
     </div>
 
     <div id="recurringList" style="max-height:180px;overflow-y:auto;margin-bottom:14px;"></div>
 
     <div style="border-top:1px solid var(--line);padding-top:12px;">
-      <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">요일 선택</div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">Choose day(s)</div>
       <div id="dowPicker" style="display:flex;gap:4px;margin-bottom:10px;"></div>
       <div style="display:flex;gap:6px;margin-bottom:8px;">
         <input type="text" id="recurTimeText" inputmode="numeric" maxlength="5" placeholder="HH:MM"
                style="width:76px;background:var(--bg);border:1.5px solid var(--line);color:var(--text);border-radius:8px;padding:8px;font-family:'Consolas','Courier New',monospace;font-size:14px;font-weight:700;">
-        <input type="text" id="recurMemoText" placeholder="예: 주간 회의 준비"
+        <input type="text" id="recurMemoText" placeholder="e.g. Prep for weekly meeting"
                style="flex:1;background:var(--bg);border:1.5px solid var(--line);color:var(--text);border-radius:8px;padding:8px 10px;font-size:13px;">
       </div>
-      <button onclick="addRecurring()" style="width:100%;background:var(--teal);color:#06251f;border:none;border-radius:8px;padding:10px;font-weight:700;font-size:13px;cursor:pointer;">+ 반복 알람 추가</button>
+      <button onclick="addRecurring()" style="width:100%;background:var(--teal);color:#06251f;border:none;border-radius:8px;padding:10px;font-weight:700;font-size:13px;cursor:pointer;">+ Add Recurring Alarm</button>
     </div>
 
-    <button class="cancelbtn" onclick="closeRecurring()" style="width:100%;margin-top:10px;">닫기</button>
+    <button class="cancelbtn" onclick="closeRecurring()" style="width:100%;margin-top:10px;">Close</button>
   </div>
 </div>
 
