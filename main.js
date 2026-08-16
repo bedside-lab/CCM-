@@ -38,7 +38,7 @@ function createWidgetWindow() {
     height: 760,
     minWidth: 380,
     minHeight: 500,
-    title: 'Work Alert',
+    title: '업무알리미',
     autoHideMenuBar: true,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),

@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
 <head>
 <meta charset="UTF-8">
-<title>Reminder</title>
+<title>알림</title>
 <style>
   /* 외부 웹폰트 대신 윈도우 내장 글꼴 사용 (인터넷 제한 환경 대응) */
   *{ box-sizing:border-box; margin:0; padding:0; }
@@ -36,10 +36,10 @@
 </head>
 <body>
   <div class="box">
-    <div class="label">⏰ Reminder</div>
+    <div class="label">⏰ 알림 시간입니다</div>
     <div class="time" id="alarmTime">--:--</div>
     <div class="memo" id="alarmMemo"></div>
-    <button onclick="window.electronAPI.closeAlarm()">OK</button>
+    <button onclick="window.electronAPI.closeAlarm()">확인</button>
   </div>
 <script>
   window.electronAPI.onAlarmData((data) => {

@@ -10,7 +10,7 @@ let lastScrolledHour = null;
 let pinned = false;
 let saveTimer = null;
 let recurringAlarms = []; // {id, time:'HH:MM', memo, days:[0-6] (0=일,1=월...6=토), lastFiredDate}
-const DOW_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const DOW_LABELS = ['일', '월', '화', '수', '목', '금', '토'];
 
 function pad(n) { return String(n).padStart(2, '0'); }
 
@@ -61,7 +61,7 @@ async function init() {
 function tick() {
   const now = new Date();
   document.getElementById('dateStr').textContent =
-    now.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' });
+    now.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' });
   document.getElementById('hm').textContent = pad(now.getHours()) + ':' + pad(now.getMinutes());
   document.getElementById('ss').textContent = pad(now.getSeconds());
 
@@ -72,7 +72,7 @@ function tick() {
     tasks = buildDefaultTasks(now);
     persist();
     render();
-    toast('Midnight passed — schedule reset for the new day');
+    toast('자정이 지나 새 하루 시간표로 초기화되었습니다');
   }
 
   const curHM = pad(now.getHours()) + ':' + pad(now.getMinutes());
@@ -126,7 +126,7 @@ function closeAbout() {
 function togglePin() {
   pinned = !pinned;
   const btn = document.getElementById('pinBtn');
-  btn.textContent = pinned ? '📌 Pin: On' : '📌 Pin: Off';
+  btn.textContent = pinned ? '📌 고정 켜짐' : '📌 고정 꺼짐';
   btn.classList.toggle('on', pinned);
   window.electronAPI.setAlwaysOnTop(pinned);
 }
@@ -161,12 +161,12 @@ document.getElementById('confirmYesBtn').onclick = function () {
 };
 
 function clearAll() {
-  if (tasks.length === 0) { toast('Already empty'); return; }
-  askConfirm('This will clear all content and alarm settings\nand reset to the default 09:00–18:00 schedule. Continue?', function () {
+  if (tasks.length === 0) { toast('이미 비어 있습니다'); return; }
+  askConfirm('입력한 내용과 알람 설정을 모두 지우고\n기본 시간대(09~18시)로 되돌릴까요?', function () {
     tasks = buildDefaultTasks(new Date());
     persist();
     render();
-    toast('Content has been reset');
+    toast('내용을 초기화했습니다');
   });
 }
 
@@ -213,8 +213,8 @@ function setupTimeInput() {
 
 function addTimeSlot() {
   const time = document.getElementById('inTimeText').value;
-  if (!/^\d{2}:\d{2}$/.test(time)) { toast('Please enter a valid time (HH:MM), e.g. 22:30'); return; }
-  if (tasks.some(t => t.time === time)) { toast('That time is already added'); return; }
+  if (!/^\d{2}:\d{2}$/.test(time)) { toast('시간을 HH:MM 형식으로 입력해주세요 (예: 22:30)'); return; }
+  if (tasks.some(t => t.time === time)) { toast('이미 등록된 시간입니다'); return; }
   tasks.push({ id: Date.now(), time, memo: '', done: false, fired: false, alarmOn: false });
   document.getElementById('inTimeText').value = '';
   persist();
@@ -260,7 +260,7 @@ function render() {
   const recurToday = todaysRecurringRows(now);
 
   if (tasks.length === 0 && recurToday.length === 0) {
-    el.innerHTML = '<div class="empty">No items yet.</div>';
+    el.innerHTML = '<div class="empty">등록된 항목이 없습니다.</div>';
     return;
   }
 
@@ -288,9 +288,9 @@ function render() {
           <div class="time">${r.time}</div>
           <div class="dot"></div>
           <div class="body">
-            <span class="rtag">🔁 Recurring</span>
+            <span class="rtag">🔁 반복</span>
             <span class="rmemoDisplay">${escapeHtml(r.memo)}</span>
-            <button class="del" onclick="deleteRecurring(${r.id})" title="Delete recurring alarm">✕</button>
+            <button class="del" onclick="deleteRecurring(${r.id})" title="반복알람 삭제">✕</button>
           </div>
         </div>`;
     }
@@ -306,12 +306,12 @@ function render() {
         <div class="time">${t.time}</div>
         <div class="dot"></div>
         <div class="body">
-          <button class="checkbtn" onclick="toggleDone(${t.id})" title="Mark done">✓</button>
+          <button class="checkbtn" onclick="toggleDone(${t.id})" title="완료 체크">✓</button>
           <input class="memo-input" type="text" data-id="${t.id}"
-                 value="${escapeHtml(t.memo)}" placeholder="Enter a task..."
+                 value="${escapeHtml(t.memo)}" placeholder="할 일을 입력하세요..."
                  oninput="updateMemo(${t.id}, this.value)">
-          <button class="bellbtn ${t.alarmOn ? 'on' : ''}" onclick="toggleAlarm(${t.id})" title="Toggle alarm">🔔</button>
-          <button class="del" onclick="deleteTask(${t.id})" title="Delete">✕</button>
+          <button class="bellbtn ${t.alarmOn ? 'on' : ''}" onclick="toggleAlarm(${t.id})" title="알람 켜기/끄기">🔔</button>
+          <button class="del" onclick="deleteTask(${t.id})" title="삭제">✕</button>
         </div>
       </div>`;
   }).join('');
@@ -371,7 +371,7 @@ function renderDowPicker() {
   const el = document.getElementById('dowPicker');
   const allOn = selectedDows.size === 7;
   el.innerHTML =
-    `<button type="button" class="dowchip everyday ${allOn ? 'on' : ''}" onclick="toggleEveryday()">Daily</button>` +
+    `<button type="button" class="dowchip everyday ${allOn ? 'on' : ''}" onclick="toggleEveryday()">매일</button>` +
     DOW_LABELS.map((label, i) =>
       `<button type="button" class="dowchip ${selectedDows.has(i) ? 'on' : ''}" onclick="toggleDow(${i})">${label}</button>`
     ).join('');
@@ -392,18 +392,18 @@ function toggleDow(i) {
 function renderRecurringList() {
   const el = document.getElementById('recurringList');
   if (recurringAlarms.length === 0) {
-    el.innerHTML = '<div class="recur-empty">No recurring alarms yet.</div>';
+    el.innerHTML = '<div class="recur-empty">등록된 반복 알람이 없습니다.</div>';
     return;
   }
   const sorted = [...recurringAlarms].sort((a, b) => a.time.localeCompare(b.time));
   el.innerHTML = sorted.map(r => {
-    const daysLabel = r.days.length === 7 ? 'Daily' : r.days.slice().sort().map(d => DOW_LABELS[d]).join(', ');
+    const daysLabel = r.days.length === 7 ? '매일' : r.days.slice().sort().map(d => DOW_LABELS[d]).join('');
     return `
       <div class="recuritem">
         <span class="rtime">${r.time}</span>
         <span class="rdays">[${daysLabel}]</span>
         <span class="rmemo">${escapeHtml(r.memo)}</span>
-        <button class="rdel" onclick="deleteRecurring(${r.id})" title="Delete">✕</button>
+        <button class="rdel" onclick="deleteRecurring(${r.id})" title="삭제">✕</button>
       </div>`;
   }).join('');
 }
@@ -411,9 +411,9 @@ function renderRecurringList() {
 function addRecurring() {
   const time = document.getElementById('recurTimeText').value;
   const memo = document.getElementById('recurMemoText').value.trim();
-  if (!/^\d{2}:\d{2}$/.test(time)) { toast('Please enter a valid time (HH:MM)'); return; }
-  if (selectedDows.size === 0) { toast('Please select at least one day'); return; }
-  if (!memo) { toast('Please enter what to be reminded of'); return; }
+  if (!/^\d{2}:\d{2}$/.test(time)) { toast('시간을 HH:MM 형식으로 입력해주세요'); return; }
+  if (selectedDows.size === 0) { toast('반복할 요일을 하나 이상 선택해주세요'); return; }
+  if (!memo) { toast('알림 내용을 입력해주세요'); return; }
 
   recurringAlarms.push({
     id: Date.now(),
@@ -429,7 +429,7 @@ function addRecurring() {
   renderDowPicker();
   renderRecurringList();
   render();
-  toast("Recurring alarm added (shown in purple on today's timeline if it applies today)");
+  toast('반복 알람이 추가되었습니다 (오늘 요일이면 시간표에도 보라색으로 표시돼요)');
 }
 
 function deleteRecurring(id) {

@@ -1,7 +1,7 @@
 {
   "name": "icu-shift-widget",
   "version": "1.0.0",
-  "description": "Work task reminder widget",
+  "description": "ICU 근무 타임라인 위젯",
   "main": "main.js",
   "author": "BBO",
   "license": "UNLICENSED",
@@ -14,8 +14,8 @@
     "electron-builder": "^24.13.3"
   },
   "build": {
-    "appId": "com.bbo.work-alert-en",
-    "productName": "Work Alert",
+    "appId": "com.bbo.work-alert",
+    "productName": "업무알리미",
     "win": {
       "target": "nsis",
       "icon": "build/icon.ico"
